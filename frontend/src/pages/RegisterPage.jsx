@@ -20,10 +20,11 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [deposit, setDeposit] = useState(0);
   const [error, setError] = useState("");
+  const [buttonText, setButtonText] = useState("Register");
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
+    setButtonText("Processing ...");
     try {
       const response = await fetch("https://localhost:7241/api/User/Register", {
         method: "POST",
@@ -61,6 +62,7 @@ const LoginPage = () => {
         setError("An error occured while processing your request.");
       }
     }
+    setButtonText("Register");
   };
 
   return (
@@ -156,7 +158,7 @@ const LoginPage = () => {
               type="submit"
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Register
+              {buttonText}
             </button>
           </div>
         </form>

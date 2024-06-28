@@ -51,10 +51,10 @@ const HomePage = () => {
         toast.success("Balance fetched successfully.");
         setBalance(data.balance);
       } else {
-        toast.error("Error fetching balance.");
+        toast.error("Error fetching balance. Can't connect to the server.");
       }
     } catch (error) {
-      toast.error("Error fetching balance.");
+      toast.error("Error fetching balance. Can't connect to the server.");
     }
   };
 
@@ -62,29 +62,28 @@ const HomePage = () => {
     showDepositModal(true);
   };
 
-   const handleDeposit = async (e) => {
+  const handleDeposit = async (e) => {
     e.preventDefault();
 
     const depositPromise = fetch(
       `https://localhost:7241/api/Account/Deposit?amount=${deposit}`,
       {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `${token}`, // Ensure the token is passed correctly
         },
       }
     ).then((response) => {
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
       return response.json();
     });
 
-    toast.promise(
-      depositPromise,
-      {
-        pending: 'Processing your deposit...',
+    toast
+      .promise(depositPromise, {
+        pending: "Processing your deposit...",
         success: {
           render({ data }) {
             closeModal();
@@ -93,14 +92,14 @@ const HomePage = () => {
         },
         error: {
           render({ data }) {
-            return data.message || 'Error processing your request.';
+            return data.message || "Error processing your request.";
           },
         },
-      }
-    ).catch((error) => {
-      console.error('Error processing deposit:', error);
-      toast.error('Error processing your request.');
-    });
+      })
+      .catch((error) => {
+        console.error("Error processing deposit:", error);
+        toast.error("Error processing your request.");
+      });
   };
 
   const showWithdraw = () => {
@@ -109,41 +108,54 @@ const HomePage = () => {
 
   const handleWithdraw = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch(
-        `https://localhost:7241/api/Account/Withdraw`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `${token}`,
-          },
-          body: JSON.stringify({
-            amount: withdraw,
-            password: password,
-          }),
-        }
-      );
 
-      const data = await response.json();
-
-      console.log(data);
-
-      if (data.isSuccess) {
-        toast.success(data.message);
-        closeModal();
-      } else {
-        toast.error(data.message);
+    const withdrawPromise = fetch(
+      `https://localhost:7241/api/Account/Withdraw`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${token}`,
+        },
+        body: JSON.stringify({
+          amount: withdraw,
+          password: password,
+        }),
       }
-    } catch (error) {
-      toast.error("Error processing your request.");
-    }
+    ).then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    });
+
+    toast
+      .promise(withdrawPromise, {
+        pending: "Processing your withdrawal...",
+        success: {
+          render({ data }) {
+            closeModal();
+            return data.message;
+          },
+        },
+        error: {
+          render({ data }) {
+            return data.message || "Error processing your request.";
+          },
+        },
+      })
+      .catch((error) => {
+        console.error("Error processing withdrawal:", error);
+        toast.error("Error processing your request.");
+      });
   };
 
   const closeModal = () => {
     showBalanceModal(false);
     showDepositModal(false);
     showWithdrawalModal(false);
+    setPassword("");
+    setDeposit("");
   };
 
   return (

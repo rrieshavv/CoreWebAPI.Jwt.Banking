@@ -11,10 +11,11 @@ const LoginPage = () => {
   useEffect(() => {
     // Redirect to home page if user is already authenticated
     if (isAuthenticated) {
-      navigate('/');
+      navigate("/");
     }
   }, [isAuthenticated, navigate]);
 
+  const [buttonText, setButtonText] = useState("Sign In");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -22,7 +23,7 @@ const LoginPage = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+    setButtonText("Processing ...");
     try {
       const response = await fetch("https://localhost:7241/api/User/Login", {
         method: "POST",
@@ -64,6 +65,7 @@ const LoginPage = () => {
         setError("Invalid username or password. Please try again.");
       }
     }
+    setButtonText("Sign In");
   };
 
   return (
@@ -128,7 +130,7 @@ const LoginPage = () => {
               type="submit"
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Sign in
+              {buttonText}
             </button>
           </div>
         </form>
