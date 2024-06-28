@@ -11,16 +11,19 @@ using Task.Services.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
+// add config for the identity setup
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-// Add config for the reset password (for token lifespan)
+// add config for the reset password (for token lifespan)
 builder.Services.Configure<DataProtectionTokenProviderOptions>(
     opts => opts.TokenLifespan = TimeSpan.FromHours(10));
 
+// add config for the authentication with JWT bearer tokens
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -40,10 +43,12 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// add the services 
+// dependency injection
 builder.Services.AddScoped<IUserManagement, UserManagement>();
 builder.Services.AddScoped<IAccountManagement, AccountManagement>();
 
-// Cors 
+// cors policy config to communicate with the frontend
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -55,7 +60,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 
-// For swagger auth
+// for swagger auth (for debugging purpose)
 builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "Auth API", Version = "v1" });

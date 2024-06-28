@@ -30,14 +30,16 @@ namespace Task.API.Controllers
 
                 if (response.IsSuccess)
                 {
+                    // balance fetched successfully
                     return StatusCode(StatusCodes.Status200OK, new InquiryResponse { Balance = response.Res!.Balance, IsSuccess = true });
                 }
                 else
                 {
+                    // failed to retrieve balance
                     return StatusCode(StatusCodes.Status401Unauthorized, new InquiryResponse { IsSuccess = false });
                 }
             }
-
+            // user is not authenticated
             return StatusCode(StatusCodes.Status401Unauthorized, new Response { Message = "You are not logged in!", IsSuccess = false });
         }
 
@@ -53,18 +55,20 @@ namespace Task.API.Controllers
                     Amount = amount
                 };
 
-                // if user is authenticated with correct credentials and username is not null, fetch and return the account balance
+                // initiate the deposit 
                 var response = await _account.DepositAsync(deposit);
                 if (response.IsSuccess)
                 {
+                    // deposit successful
                     return StatusCode(StatusCodes.Status200OK, new Response { Message = response.Message, IsSuccess = response.IsSuccess });
                 }
                 else
                 {
+                    // deposit failed
                     return StatusCode(StatusCodes.Status401Unauthorized, new Response { Message = response.Message, IsSuccess = response.IsSuccess });
                 }
             }
-
+            // user not authenticated
             return StatusCode(StatusCodes.Status401Unauthorized, new Response { Message = "You are not logged in!", IsSuccess = false });
         }
 
@@ -83,19 +87,21 @@ namespace Task.API.Controllers
                     Username = User.Identity.Name
                 };
 
-                // if user is authenticated with correct credentials and username is not null, fetch and return the account balance
+                // initiate the withdraw
                 var response = await _account.WithdrawAsync(withdraw);
 
                 if (response.IsSuccess)
                 {
+                    // withdraw successful
                     return StatusCode(StatusCodes.Status200OK, new Response { Message = response.Message, IsSuccess = response.IsSuccess });
                 }
                 else
                 {
+                    // withdraw failed
                     return StatusCode(StatusCodes.Status400BadRequest, new Response { Message = response.Message, IsSuccess = false });
                 }
             }
-
+            // use is not authenticated
             return StatusCode(StatusCodes.Status401Unauthorized, new Response { Message = "You are not logged in!", IsSuccess = false });
         }
     }

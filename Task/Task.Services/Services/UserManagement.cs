@@ -35,7 +35,7 @@ namespace Task.Services.Services
                 return new Response<UserRegistrationResponse> { IsSuccess = false, StatusCode = 403, Message = "User already exists" };
             }
 
-            // Add the user in the database
+            // create the new user instance
             ApplicationUser user = new()
             {
                 Email = userRegistration.Email,
@@ -45,12 +45,12 @@ namespace Task.Services.Services
                 Balance = userRegistration.InitialDeposit
             };
 
+            // add the user to the database
             var result = await _userManager.CreateAsync(user, userRegistration.Password!);
 
             if (result.Succeeded)
             {
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                return new Response<UserRegistrationResponse> { Res = new UserRegistrationResponse() { User = user, Token = token }, IsSuccess = true, StatusCode = 201, Message = "User Created." };
+                return new Response<UserRegistrationResponse> { Res = new UserRegistrationResponse() { User = user}, IsSuccess = true, StatusCode = 201, Message = "User Created." };
             }
             else
             {
@@ -64,15 +64,19 @@ namespace Task.Services.Services
             var assignedRole = new List<string>();
             foreach (var role in roles)
             {
+                // check if the role exists
                 if (await _roleManager.RoleExistsAsync(role))
                 {
+                    // check if user is already in the given role
                     if (!await _userManager.IsInRoleAsync(user, role))
                     {
+                        // if user is not already in that role, assign it.
                         await _userManager.AddToRoleAsync(user, role);
                         assignedRole.Add(role);
                     }
                 }
             }
+            // return the list of roles assigned.
             return new Response<List<string>> { IsSuccess = true, StatusCode = 200, Message = "Roles has been assigned successfully.", Res = assignedRole };
         }
 
@@ -109,6 +113,11 @@ namespace Task.Services.Services
             return new Response<UserLoginResponse> {  IsSuccess = false, StatusCode = 401, Message = "Login failed. Please provide valid credentials." };
         }
 
+        /// <summary>
+        /// Generates the JWT authenticated token with the list of claims.
+        /// </summary>
+        /// <param name="authClaims"></param>
+        /// <returns>The token object.</returns>
         private JwtSecurityToken GetToken(List<Claim> authClaims)
         {
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]!));
