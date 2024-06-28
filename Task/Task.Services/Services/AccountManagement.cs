@@ -32,6 +32,10 @@ namespace Task.Services.Services
 
         public async Task<Response<Deposit>> DepositAsync(Deposit deposit)
         {
+            if (deposit.Amount <= 0)
+            {
+                return new Response<Deposit> { IsSuccess = false, Message = "Invalid request. The amount must be greater than 0.", StatusCode = 401 };
+            }
             // check if the user is present
             var user = await _userManager.FindByNameAsync(deposit.Username!);
 
@@ -62,14 +66,18 @@ namespace Task.Services.Services
 
         public async Task<Response<WithdrawResponse>> WithdrawAsync(Withdraw withdraw)
         {
+
+            if (withdraw.Amount <= 0)
+            {
+                return new Response<WithdrawResponse> { IsSuccess = false, Message = "Invalid request. The amount is not valid.", StatusCode = 400, Res = new WithdrawResponse { IsSuccess = false, Amount = withdraw.Amount } };
+            }
             // check if the user is valid
             var user = await _userManager.FindByNameAsync(withdraw.Username!);
 
             if (user != null && await _userManager.CheckPasswordAsync(user, withdraw.Password!))
             {
                 // check the balance
-                
-                if(user.Balance < withdraw.Amount)
+                if (user.Balance < withdraw.Amount)
                 {
                     // balance is less than withdrawal amount
                     return new Response<WithdrawResponse> { IsSuccess = false, Message = "Not enough balance.", StatusCode = 400, Res = new WithdrawResponse { IsSuccess = false, Amount = withdraw.Amount } };
